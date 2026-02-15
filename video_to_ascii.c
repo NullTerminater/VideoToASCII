@@ -3,8 +3,11 @@
 #include <libavformat/avformat.h>
 
 int main(void) {
-    const char *cmd = "ffmpeg -f avfoundation -video_size 640x480 -framerate 30 -i \"0\" -vframes 60 test.mp4";
+    const char *brightness = " .:-=+*#%@";
+    const char *cmd = "ffmpeg -f avfoundation -video_size 640x480 -framerate 30 -i \"0\" -vf \"format=gray\" -vframes 60 test.mp4";
     system(cmd);
+    const char *extract = "ffmpeg -i test.mp4 -r 1 frame%d.bmp";
+    system(extract);
 
     // avdevice_register_all();
 
