@@ -4,6 +4,7 @@
 #include <stdint.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
+#include <bmp.h>
 
 
 int main(void) {
@@ -14,8 +15,11 @@ int main(void) {
     // const char *extract = "ffmpeg -i test.mp4 -r 1 frame%d.bmp";
     // system(extract);
     int width, height, bpp;
+    FILE *file = fopen("frame1.bmp", "r");
 
     uint8_t* rgb_image = stbi_load("frame1.bmp", &width, &height, &bpp, 3);
+    long pos = ftell(file);
+    printf("pos from ftell is %ld\n" , pos);
     printf("properties %d %d %d \n", width, height, bpp);
     stbi_image_free(rgb_image);
 
