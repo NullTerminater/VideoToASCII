@@ -29,11 +29,11 @@ int main(void) {
         for(int x = 0; x < width; x++){
             uint8_t* pixel = rgb_image + (y * width + x) * 3;
             uint8_t r = pixel[0];
+            uint8_t g = pixel[1]; //since this is a greyscale, we do not care about these yet
+            uint8_t b = pixel[2];
             int index = (r * (LENGTH - 1)) / 255;
             char ascii = brightness[index];
-            fprintf(file_pointer, &ascii);
-            // uint8_t g = pixel[1]; //since this is a greyscale, we do not care about these yet
-            // uint8_t b = pixel[2];
+            fprintf(file_pointer, "%c", ascii);
             // if (x == 0) {
             //     printf("Row %d, First Pixel: R=%d G=%d B=%d\n", y, r, g, b);
             // }
