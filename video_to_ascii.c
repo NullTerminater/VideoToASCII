@@ -33,12 +33,12 @@ int main(void) {
             uint8_t b = pixel[2];
             int index = (r * (LENGTH - 1)) / 255;
             char ascii = brightness[index];
-            fprintf(file_pointer, "%c", ascii);
+            fputc(ascii, file_pointer);
             // if (x == 0) {
             //     printf("Row %d, First Pixel: R=%d G=%d B=%d\n", y, r, g, b);
             // }
         }
-            fprintf(file_pointer, "\n");
+            fputc('\n', file_pointer);
     }
     fclose(file_pointer);
 
