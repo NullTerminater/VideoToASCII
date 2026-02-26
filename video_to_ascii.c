@@ -2,6 +2,7 @@
 #include <libavdevice/avdevice.h>
 #include <libavformat/avformat.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -13,49 +14,32 @@
 
 int main(void) {
     const char *brightness = " .:-=+*#%@";
-
-    // const char *cmd = "ffmpeg -f avfoundation -video_size 640x480 -framerate 30 -i \"0\" -vf \"format=gray\" -vframes 60 test.mp4";
-    // system(cmd);
-    // const char *extract = "ffmpeg -i test.mp4 -r 1 frame%d.bmp";
-    // system(extract);
-
-    // int width, height, bpp;
-    // uint8_t* rgb_image = stbi_load("frame1.bmp", &width, &height, &bpp, 3);
-    // if (rgb_image == NULL) {
-    //     printf("Error: Could not load image\n");
-    //     return 1;
+    // if (getenv("ASCII_VIDEO_MODE") == NULL) {
+    //     // This code only runs in the ORIGINAL terminal
+    //     const char *cmd = "osascript -e 'tell application \"Terminal\" to do script \"export ASCII_VIDEO_MODE=1; stty cols 80 rows 60; ~/personal/projects/VideoToAscii/./a.out\"'";
+    //     system(cmd);
+    //     return 0; // Close the original terminal's process
     // }
     uint8_t *buffer = malloc(WIDTH * HEIGHT);
-    FILE *pipe = popen("ffmpeg -f avfoundation -framerate 30 -video_size 80x60 -i \"0\" -f rawvideo  -pix_fmt gray -", "r");
-    while (1){
-        fread(buffer, 1, WIDTH * HEIGHT, pipe);
-        char c = brightness[(character * LENGTH - 1) / 255];
-        printf("\e[8;60;80t");
-        if (c < WIDTH * HEIGHT) {
+    FILE *pipe = popen("ffmpeg -f avfoundation -framerate 30 -video_size 640x480 -i \"0\" -f rawvideo  -pix_fmt gray - -loglevel quiet -stats -vf \"transpose=2,transpose=2\"", "r");
+    printf("\e[8;60;80t");
+    while (fread(buffer, 1, WIDTH * HEIGHT, pipe) == WIDTH * HEIGHT){
+        printf("\033[H");
+        size_t bytes_read = fread(buffer, 1, WIDTH * HEIGHT, pipe);
+        if (bytes_read < WIDTH * HEIGHT) {
             break;
         }
+        for (int y = 0; y < HEIGHT; y+= CHUNK_SIZE){
+            for(int x = 0; x < WIDTH; x+= CHUNK_SIZE){
+                int value = buffer[y * WIDTH + x];
+                int index = (value * (LENGTH - 1)) / 255;
+                putchar(brightness[index]);
+            }
+            putchar('\n');
+        }
+        fflush(stdout);
     }
-
+    pclose(pipe);
     free(buffer);
-
-    // FILE *file_pointer = fopen("ascii.txt", "w");
-    // for (int y = 0; y < height; y += CHUNK_SIZE){
-    //     for(int x = 0; x < width; x += CHUNK_SIZE){
-
-
-    //         uint8_t* pixel = rgb_image + (y * width + x) * 3;
-    //         uint8_t r = pixel[0];
-    //         uint8_t g = pixel[1]; //since this is a greyscale, we do not care about these yet
-    //         uint8_t b = pixel[2];
-    //         int index = (r * (LENGTH - 1)) / 255;
-    //         char ascii = brightness[index];
-    //         fputc(ascii, file_pointer);
-    //     }
-    //     fputc('\n', file_pointer);
-    // }
-    // fclose(file_pointer);
-
-    // stbi_image_free(rgb_image);
-
     return 0;
 }
