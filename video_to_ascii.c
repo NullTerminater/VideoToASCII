@@ -7,6 +7,8 @@
 #include "stb/stb_image.h"
 #define LENGTH 10
 #define CHUNK_SIZE 8
+#define WIDTH 640
+#define HEIGHT 480
 
 
 int main(void) {
@@ -16,36 +18,44 @@ int main(void) {
     // system(cmd);
     // const char *extract = "ffmpeg -i test.mp4 -r 1 frame%d.bmp";
     // system(extract);
-    int width, height, bpp;
-    // FILE *file = fopen("frame1.bmp", "r");
-    // FILE *file = fopen("frame1_compressed.bmp", "r");
-    uint8_t* rgb_image = stbi_load("frame1.bmp", &width, &height, &bpp, 3);
-    if (rgb_image == NULL) {
-        printf("Error: Could not load image\n");
-        return 1;
-    }
 
-    FILE *file_pointer = fopen("ascii.txt", "w");
-    for (int y = 0; y < height; y += CHUNK_SIZE){
-        for(int x = 0; x < width; x += CHUNK_SIZE){
-
-
-            uint8_t* pixel = rgb_image + (y * width + x) * 3;
-            uint8_t r = pixel[0];
-            uint8_t g = pixel[1]; //since this is a greyscale, we do not care about these yet
-            uint8_t b = pixel[2];
-            int index = (r * (LENGTH - 1)) / 255;
-            char ascii = brightness[index];
-            fputc(ascii, file_pointer);
+    // int width, height, bpp;
+    // uint8_t* rgb_image = stbi_load("frame1.bmp", &width, &height, &bpp, 3);
+    // if (rgb_image == NULL) {
+    //     printf("Error: Could not load image\n");
+    //     return 1;
+    // }
+    uint8_t *buffer = malloc(WIDTH * HEIGHT);
+    FILE *pipe = popen("ffmpeg -f avfoundation -framerate 30 -video_size 80x60 -i \"0\" -f rawvideo  -pix_fmt gray -", "r");
+    while (1){
+        fread(buffer, 1, WIDTH * HEIGHT, pipe);
+        char c = brightness[(character * LENGTH - 1) / 255];
+        printf("\e[8;60;80t");
+        if (c < WIDTH * HEIGHT) {
+            break;
         }
-        fputc('\n', file_pointer);
     }
-    fclose(file_pointer);
 
-    // long pos = ftell(file);
-    // printf("pos from ftell is %ld\n" , pos);
-    // printf("properties %d %d %d \n", width, height, bpp);
-    stbi_image_free(rgb_image);
+    free(buffer);
+
+    // FILE *file_pointer = fopen("ascii.txt", "w");
+    // for (int y = 0; y < height; y += CHUNK_SIZE){
+    //     for(int x = 0; x < width; x += CHUNK_SIZE){
+
+
+    //         uint8_t* pixel = rgb_image + (y * width + x) * 3;
+    //         uint8_t r = pixel[0];
+    //         uint8_t g = pixel[1]; //since this is a greyscale, we do not care about these yet
+    //         uint8_t b = pixel[2];
+    //         int index = (r * (LENGTH - 1)) / 255;
+    //         char ascii = brightness[index];
+    //         fputc(ascii, file_pointer);
+    //     }
+    //     fputc('\n', file_pointer);
+    // }
+    // fclose(file_pointer);
+
+    // stbi_image_free(rgb_image);
 
     return 0;
 }
