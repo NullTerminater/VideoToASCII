@@ -2,14 +2,15 @@
 #include <libavdevice/avdevice.h>
 #include <libavformat/avformat.h>
 #include <stdint.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
-#define LENGTH 9
-// #include <bmp.h>
+#define LENGTH 10
+#define CHUNK_SIZE 8
 
 
 int main(void) {
-    const char *brightness = ".:-=+*#%@";
+    const char *brightness = " .:-=+*#%@";
 
     // const char *cmd = "ffmpeg -f avfoundation -video_size 640x480 -framerate 30 -i \"0\" -vf \"format=gray\" -vframes 60 test.mp4";
     // system(cmd);
@@ -25,8 +26,10 @@ int main(void) {
     }
 
     FILE *file_pointer = fopen("ascii.txt", "w");
-    for (int y = 0; y < height; y++){
-        for(int x = 0; x < width; x++){
+    for (int y = 0; y < height; y += CHUNK_SIZE){
+        for(int x = 0; x < width; x += CHUNK_SIZE){
+
+
             uint8_t* pixel = rgb_image + (y * width + x) * 3;
             uint8_t r = pixel[0];
             uint8_t g = pixel[1]; //since this is a greyscale, we do not care about these yet
@@ -34,11 +37,8 @@ int main(void) {
             int index = (r * (LENGTH - 1)) / 255;
             char ascii = brightness[index];
             fputc(ascii, file_pointer);
-            // if (x == 0) {
-            //     printf("Row %d, First Pixel: R=%d G=%d B=%d\n", y, r, g, b);
-            // }
         }
-            fputc('\n', file_pointer);
+        fputc('\n', file_pointer);
     }
     fclose(file_pointer);
 
